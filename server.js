@@ -5,6 +5,8 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+const db = require("./models");
+
 //MIDDLEWARE
 app.use(
 	express.urlencoded({
@@ -14,13 +16,10 @@ app.use(
 app.use(express.json());
 
 //Mongoose DB Connection
-mongoose.connect(
-	process.env.MONGODB_URI || "mongodb://localhost/wedding_pot_db",
-	{
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	}
-);
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/myBookDB", {
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+});
 
 const connection = mongoose.connection;
 
@@ -36,6 +35,37 @@ connection.on("error", (err) => {
 app.get("/api/config", (req, res) => {
 	res.json({
 		success: true,
+	});
+});
+
+app.get("/api/book", (req, res) => {
+	db.Book.find({}).then((foundBooks) => {
+		res.json(foundBooks);
+	});
+});
+
+app.get("/api/book/:id", (req, res) => {
+	db.Book.find({ _id: req.params.id }).then((foundBook) => {
+		res.json(foundBook);
+	});
+});
+
+app.post("/api/book", (req, res) => {
+	db.Book.create(req.body).then((newBook) => {
+		res.json(newBook);
+	});
+});
+app.put("/api/book/:id", (req, res) => {
+	db.Book.findByIdAndUpdate(req.params.id, req.body, { new: true }).then(
+		(updatedBook) => {
+			res.json(updatedBook);
+		}
+	);
+});
+
+app.delete("/api/book/:id", (req, res) => {
+	db.Book.findOneAndDelete(req.params.id).then((result) => {
+		res.json(result);
 	});
 });
 
