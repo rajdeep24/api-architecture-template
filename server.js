@@ -5,20 +5,20 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-const db = require("./models");
+const BookController = require("./controllers/bookController");
+const AuthorController = require("./controllers/authorController");
+const UserController = require("./controllers/userController");
 
 //MIDDLEWARE
-app.use(
-	express.urlencoded({
-		extended: true,
-	})
-);
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //Mongoose DB Connection
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/myBookDB", {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
+	useCreateIndex: true,
+	useFindAndModify: false,
 });
 
 const connection = mongoose.connection;
@@ -38,36 +38,9 @@ app.get("/api/config", (req, res) => {
 	});
 });
 
-app.get("/api/book", (req, res) => {
-	db.Book.find({}).then((foundBooks) => {
-		res.json(foundBooks);
-	});
-});
-
-app.get("/api/book/:id", (req, res) => {
-	db.Book.find({ _id: req.params.id }).then((foundBook) => {
-		res.json(foundBook);
-	});
-});
-
-app.post("/api/book", (req, res) => {
-	db.Book.create(req.body).then((newBook) => {
-		res.json(newBook);
-	});
-});
-app.put("/api/book/:id", (req, res) => {
-	db.Book.findByIdAndUpdate(req.params.id, req.body, { new: true }).then(
-		(updatedBook) => {
-			res.json(updatedBook);
-		}
-	);
-});
-
-app.delete("/api/book/:id", (req, res) => {
-	db.Book.findOneAndDelete(req.params.id).then((result) => {
-		res.json(result);
-	});
-});
+app.use(BookController);
+app.use(AuthorController);
+app.use(UserController);
 
 //LISTENER
 app.listen(PORT, () => {
