@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -5,6 +6,7 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+const AuthController = require("./controllers/authController");
 const BookController = require("./controllers/bookController");
 const AuthorController = require("./controllers/authorController");
 const UserController = require("./controllers/userController");
@@ -37,10 +39,10 @@ app.get("/api/config", (req, res) => {
 		success: true,
 	});
 });
-
-app.use(BookController);
-app.use(AuthorController);
-app.use(UserController);
+app.use(AuthController);
+app.use("/api/book", BookController);
+app.use("/api/author", AuthorController);
+app.use("/api/user", UserController);
 
 //LISTENER
 app.listen(PORT, () => {

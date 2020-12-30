@@ -1,35 +1,61 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 const db = require("../models");
 
-router.get("/api/book", (req, res) => {
-	db.Book.find({})
-		.populate("author", "firstName lastName")
-		.then((foundBooks) => {
-			res.json(foundBooks);
-		})
-		.catch((err) => {
+router.get("/", (req, res) => {
+	//Check fo user-provided token.
+	//If token, decode it.
+	//If valid token, find books.
+	//Else status 401
+	console.log(req.headers);
+	if (!req.headers.authorization) {
+		return res.status(401).json({
+			error: true,
+			data: null,
+			message: "Unauthorized",
+		});
+	}
+	jwt.verify(req.headers.authorization, process.env.SECRET, (err, decoded) => {
+		if (err) {
 			console.log(err);
-			res.status(500).json({
+			return res.status(401).json({
 				error: true,
 				data: null,
-				message: "Failed to retrieve all books.",
+				message: "invalid token.",
 			});
-		});
+		} else {
+			console.log(decoded);
+
+			db.Book.find({})
+				.populate("author", "firstName lastName")
+				.then((foundBooks) => {
+					res.json(foundBooks);
+				})
+				.catch((err) => {
+					console.log(err);
+					res.status(500).json({
+						error: true,
+						data: null,
+						message: "Failed to retrieve all books.",
+					});
+				});
+		}
+	});
 });
 
-router.get("/api/book/:id", (req, res) => {
+router.get("/:id", (req, res) => {
 	db.Book.find({ _id: req.params.id }).then((foundBook) => {
 		res.json(foundBook);
 	});
 });
 
-router.post("/api/book", (req, res) => {
+router.post("/", (req, res) => {
 	db.Book.create(req.body).then((newBook) => {
 		res.json(newBook);
 	});
 });
-router.put("/api/book/:id", (req, res) => {
+router.put("/:id", (req, res) => {
 	db.Book.findByIdAndUpdate(req.params.id, req.body, { new: true }).then(
 		(updatedBook) => {
 			res.json(updatedBook);
@@ -37,7 +63,7 @@ router.put("/api/book/:id", (req, res) => {
 	);
 });
 
-router.delete("/api/book/:id", (req, res) => {
+router.delete("/:id", (req, res) => {
 	db.Book.findOneAndDelete(req.params.id).then((result) => {
 		res.json(result);
 	});

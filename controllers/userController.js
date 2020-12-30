@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 const db = require("../models");
 
+//TODO: Build an Authentication/Authorization controller
+
 router.get("/", (req, res) => {
+	//TODO: Restrict which fields are returned. NO PASSWORDS!
 	db.User.find({})
 		.populate("books")
 		.then((foundUsers) => {
@@ -11,6 +14,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
+	//TODO: Restrict which fields are returned.NO PASSWORD!
 	db.User.find({ _id: req.params.id }).then((foundUser) => {
 		res.json(foundUser);
 	});
@@ -21,7 +25,9 @@ router.post("/", (req, res) => {
 		res.json(newUser);
 	});
 });
+
 router.put("/:id", (req, res) => {
+	//TODO: Restrict which fields are editable
 	db.User.findByIdAndUpdate(req.params.id, req.body, { new: true }).then(
 		(updatedUser) => {
 			res.json(updatedUser);
@@ -30,6 +36,7 @@ router.put("/:id", (req, res) => {
 });
 
 router.delete("/:id", (req, res) => {
+	//TODO: Figure out how to restrict account deletion
 	db.User.findOneAndDelete(req.params.id).then((result) => {
 		res.json(result);
 	});
